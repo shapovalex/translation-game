@@ -98,7 +98,7 @@
 
   fetch('sentences.json')
     .then(response => response.json())
-    .then(data  => {
+    .then(data => {
       sentences = data;
       nextSentence();
     });
@@ -137,6 +137,10 @@
       });
       initialAreaElement.appendChild(div);
     });
+
+    // clear message when moving to the next sentence
+    messageElement.textContent = '';
+    messageElement.className = '';
   }
 
   function makeTilesSortable() {
@@ -166,3 +170,4 @@
 </script>
 </body>
 </html>
+
