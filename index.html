@@ -88,10 +88,16 @@
         width: auto;
       }
     }
+    #fileSelector {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.10.2/Sortable.min.js"></script>
 </head>
 <body>
+<select id="fileSelector"></select>
 <p id="sentence"></p>
 <div id="tiles"></div>
 <div id="initialArea"></div>
@@ -108,16 +114,39 @@
   let revealButton = document.getElementById('revealButton');
   let nextButton = document.getElementById('nextButton');
   let messageElement = document.getElementById('message');
+  let fileSelector = document.getElementById('fileSelector');
 
   let sentences = [];
   let currentSentence = {};
 
-  fetch('sentences.json')
-    .then(response => response.json())
-    .then(data => {
-      sentences = data;
-      nextSentence();
-    });
+  // List of available JSON files for sentences
+  let fileOptions = ['sentences.json', 'sentences2.json'];
+
+  // Populate the dropdown with file options
+  fileOptions.forEach(file => {
+    let option = document.createElement('option');
+    option.value = file;
+    option.textContent = file;
+    fileSelector.appendChild(option);
+  });
+
+  // Function to fetch sentences from selected file
+  function fetchSentences(file) {
+    fetch(file)
+      .then(response => response.json())
+      .then(data => {
+        sentences = data;
+        nextSentence();
+      });
+  }
+
+  // Fetch sentences from initial selected file
+  fetchSentences(fileSelector.value);
+
+  // Fetch new sentences when a different file is selected
+  fileSelector.addEventListener('change', function() {
+    fetchSentences(this.value);
+  });
 
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
