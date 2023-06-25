@@ -119,15 +119,18 @@
   let sentences = [];
   let currentSentence = {};
 
-  // List of available JSON files for sentences
-  let fileOptions = ['sentences.json', 'sentences2.json'];
+  let fileOptions = [
+    {file: 'sentences.json', name: 'Standard Set'},
+    {file: 'sentences2.json', name: 'Extra Set 1'},
+    {file: 'moreSentences.json', name: 'Extra Set 2'},
+  ];
 
   // Populate the dropdown with file options
-  fileOptions.forEach(file => {
-    let option = document.createElement('option');
-    option.value = file;
-    option.textContent = file;
-    fileSelector.appendChild(option);
+  fileOptions.forEach(option => {
+    let opt = document.createElement('option');
+    opt.value = option.file;
+    opt.textContent = option.name;
+    fileSelector.appendChild(opt);
   });
 
   // Function to fetch sentences from selected file
