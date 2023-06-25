@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Translation Game</title>
+  <style>
+    #tiles {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .tile {
+      margin: 5px;
+      padding: 10px;
+      border: 1px solid black;
+      cursor: move;
+    }
+    .correct {
+      color: green;
+    }
+    .incorrect {
+      color: red;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.10.2/Sortable.min.js"></script>
+</head>
+<body>
+<h1>Translation Game</h1>
+<p id="sentence"></p>
+<div id="tiles"></div>
+<button id="checkButton">Check</button>
+<button id="revealButton">Reveal Answer</button>
+<button id="nextButton">Next Sentence</button>
+<p id="message"></p>
+
+<script>
+  let sentenceElement = document.getElementById('sentence');
+  let tilesElement = document.getElementById('tiles');
+  let checkButton = document.getElementById('checkButton');
+  let revealButton = document.getElementById('revealButton');
+  let nextButton = document.getElementById('nextButton');
+  let messageElement = document.getElementById('message');
+
+  let sentences = [];
+  let currentSentence = {};
+
+  fetch('sentences.json')
+    .then(response => response.json())
+    .then(data => {
+      sentences = data;
+      currentSentence = getRandomSentence();
+      displaySentenceAndTiles(currentSentence);
+
+      // Instantiate Sortable for tilesElement
+      new Sortable(tilesElement, {
+        animation: 150,
+        ghostClass: 'sortable-ghost'
+      });
+    });
+
+  checkButton.onclick = () => {
+    let userTranslation = Array.from(tilesElement.children).map(el => el.textContent).join(' ');
+    if (userTranslation === currentSentence.translation) {
+      messageElement.textContent = 'Correct!';
+      messageElement.className = 'correct';
+    } else {
+      messageElement.textContent = 'Incorrect. Try again!';
+      messageElement.className = 'incorrect';
+    }
+  };
+
+  revealButton.onclick = () => {
+    messageElement.textContent = `Correct translation: ${currentSentence.translation}`;
+    messageElement.className = '';
+  };
+
+  nextButton.onclick = () => {
+    currentSentence = getRandomSentence();
+    tilesElement.innerHTML = ''; // Clear the current tiles
+    displaySentenceAndTiles(currentSentence);
+
+    // Refresh Sortable
+    new Sortable(tilesElement, {
+      animation: 150,
+      ghostClass: 'sortable-ghost'
+    });
+  };
+
+  function displaySentenceAndTiles(sentence) {
+    sentenceElement.textContent = sentence.sentence;
+
+    let tiles = sentence.translation.split(' ');
+    tiles = shuffleArray(tiles); // Shuffle the array to make the game challenging
+
+    for (let tile of tiles) {
+      let tileElement = document.createElement('span');
+      tileElement.textContent = tile;
+      tileElement.classList.add('tile');
+      tileElement.draggable = true;
+      tilesElement.appendChild(tileElement);
+    }
+  }
+
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function getRandomSentence() {
+    return sentences[Math.floor(Math.random() * sentences.length)];
+  }
+</script>
+</body>
+</html>
