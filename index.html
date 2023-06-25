@@ -18,11 +18,18 @@
       font-size: 1.5em;
       margin-bottom: 20px;
     }
-    #tiles {
+    #tiles, #initialArea {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       margin: 20px 0;
+      border: 1px solid #ddd;
+      padding: 10px;
+      min-height: 100px;
+      width: 80%;
+    }
+    #tiles {
+      background-color: #e6e6e6; // Different color for tiles area
     }
     .tile {
       margin: 10px;
@@ -31,7 +38,7 @@
       border: 1px solid #ddd;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      cursor: move;
+      cursor: pointer;
       transition: all 0.3s ease;
     }
     .tile:hover {
@@ -71,6 +78,7 @@
 <body>
 <p id="sentence"></p>
 <div id="tiles"></div>
+<div id="initialArea"></div>
 <button id="checkButton">Check</button>
 <button id="revealButton">Reveal Answer</button>
 <button id="nextButton">Next Sentence</button>
@@ -78,6 +86,7 @@
 
 <script>
   let sentenceElement = document.getElementById('sentence');
+  let initialAreaElement = document.getElementById('initialArea');
   let tilesElement = document.getElementById('tiles');
   let checkButton = document.getElementById('checkButton');
   let revealButton = document.getElementById('revealButton');
@@ -89,60 +98,10 @@
 
   fetch('sentences.json')
     .then(response => response.json())
-    .then(data => {
+    .then(data  => {
       sentences = data;
-      currentSentence = getRandomSentence();
-      displaySentenceAndTiles(currentSentence);
-
-      // Instantiate Sortable for tilesElement
-      new Sortable(tilesElement, {
-        animation: 150,
-        ghostClass: 'sortable-ghost'
-      });
+      nextSentence();
     });
-
-  checkButton.onclick = () => {
-    let userTranslation = Array.from(tilesElement.children).map(el => el.textContent).join(' ');
-    if (userTranslation === currentSentence.translation) {
-      messageElement.textContent = 'Correct!';
-      messageElement.className = 'correct';
-    } else {
-      messageElement.textContent = 'Incorrect. Try again!';
-      messageElement.className = 'incorrect';
-    }
-  };
-
-  revealButton.onclick = () => {
-    messageElement.textContent = `Correct translation: ${currentSentence.translation}`;
-    messageElement.className = '';
-  };
-
-  nextButton.onclick = () => {
-    currentSentence = getRandomSentence();
-    tilesElement.innerHTML = ''; // Clear the current tiles
-    displaySentenceAndTiles(currentSentence);
-
-    // Refresh Sortable
-    new Sortable(tilesElement, {
-      animation: 150,
-      ghostClass: 'sortable-ghost'
-    });
-  };
-
-  function displaySentenceAndTiles(sentence) {
-    sentenceElement.textContent = sentence.sentence;
-
-    let tiles = sentence.translation.split(' ');
-    tiles = shuffleArray(tiles); // Shuffle the array to make the game challenging
-
-    for (let tile of tiles) {
-      let tileElement = document.createElement('span');
-      tileElement.textContent = tile;
-      tileElement.classList.add('tile');
-      tileElement.draggable = true;
-      tilesElement.appendChild(tileElement);
-    }
-  }
 
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -155,8 +114,55 @@
   function getRandomSentence() {
     return sentences[Math.floor(Math.random() * sentences.length)];
   }
+
+  function nextSentence() {
+    currentSentence = getRandomSentence();
+    sentenceElement.textContent = currentSentence.sentence;
+    let shuffledWords = shuffleArray(currentSentence.translation.split(' '));
+
+    initialAreaElement.innerHTML = '';
+    tilesElement.innerHTML = '';
+
+    shuffledWords.forEach(word => {
+      let div = document.createElement('div');
+      div.textContent = word;
+      div.className = 'tile';
+      div.addEventListener('click', function() {
+        if (this.parentNode === initialAreaElement) {
+          tilesElement.appendChild(this);
+          makeTilesSortable();
+        } else if (this.parentNode === tilesElement) {
+          initialAreaElement.appendChild(this);
+        }
+      });
+      initialAreaElement.appendChild(div);
+    });
+  }
+
+  function makeTilesSortable() {
+    new Sortable(tilesElement, {
+      animation: 150,
+      ghostClass: 'tile-ghost',
+    });
+  }
+
+  checkButton.addEventListener('click', function() {
+    let userTranslation = Array.from(tilesElement.children).map(div => div.textContent).join(' ');
+    if (userTranslation === currentSentence.translation) {
+      messageElement.textContent = 'Correct!';
+      messageElement.className = 'correct';
+    } else {
+      messageElement.textContent = 'Incorrect. Try again.';
+      messageElement.className = 'incorrect';
+    }
+  });
+
+  revealButton.addEventListener('click', function() {
+    messageElement.textContent = 'The correct translation is: ' + currentSentence.translation;
+    messageElement.className = '';
+  });
+
+  nextButton.addEventListener('click', nextSentence);
 </script>
 </body>
 </html>
-
-
