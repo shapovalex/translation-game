@@ -13,10 +13,14 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      margin: 0;
+      padding: 10px;
+      box-sizing: border-box;
     }
     #sentence {
       font-size: 1.5em;
       margin-bottom: 20px;
+      text-align: center;
     }
     #tiles, #initialArea {
       display: flex;
@@ -26,7 +30,7 @@
       border: 1px solid #ddd;
       padding: 10px;
       min-height: 100px;
-      width: 80%;
+      width: 100%;
     }
     #tiles {
       background-color: #e6e6e6; // Different color for tiles area
@@ -40,6 +44,7 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       cursor: pointer;
       transition: all 0.3s ease;
+      text-align: center;
     }
     .tile:hover {
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
@@ -61,6 +66,8 @@
       border-radius: 5px;
       cursor: pointer;
       transition: all 0.3s ease;
+      width: 100%;
+      box-sizing: border-box;
     }
     button:hover {
       background-color: #0056b3;
@@ -71,6 +78,15 @@
     #message {
       margin-top: 20px;
       font-size: 1.2em;
+      text-align: center;
+    }
+    @media (min-width: 600px) {
+      #sentence, #tiles, #initialArea, button {
+        width: 80%;
+      }
+      button {
+        width: auto;
+      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.10.2/Sortable.min.js"></script>
